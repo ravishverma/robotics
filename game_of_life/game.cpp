@@ -13,12 +13,10 @@ void pretty_print(std::vector<std::vector<int>> &grid, int rows, int cols) {
     }
     std::cout << "_|" << std::endl;
 
-    int alive_count = 0;
     for (int i=0; i<rows; i++) {
         std::cout << "|";
         for (int j=0; j<cols; j++) {
             if (grid[i][j]==1) {
-                alive_count++;
                 std::cout << " X";
             } else {
                 std::cout << "  ";
@@ -32,8 +30,6 @@ void pretty_print(std::vector<std::vector<int>> &grid, int rows, int cols) {
         std::cout << "__";
     }
     std::cout << "_|" << std::endl;
-
-    std::cout << "Population : " << alive_count << std::endl;
 }
 
 int get_neighbors(const std::vector<std::vector<int>> &grid, int rows, int cols, int row, int col) {
@@ -87,29 +83,32 @@ void init_generation(std::vector<std::vector<int>> &grid, int rows, int cols, fl
     } 
 }
 
-void next_generation(std::vector<std::vector<int>> &grid, int rows, int cols) {
+int next_generation(std::vector<std::vector<int>> &grid, int rows, int cols) {
     std::vector<std::vector<int>> old_grid(rows, std::vector<int>(cols));
     old_grid = grid;
 
+    int population = 0;
     for (int i=0; i<rows; i++) {
         for (int j=0; j<cols; j++) {
             if (will_be_alive(old_grid, rows, cols, i, j)) {
                 grid[i][j] = 1;
+                population++;
             } else {
                 grid[i][j] = 0;
             }
         }
     } 
     
+    return population;
 }
 
 int main() {
-    int rows = 42;
-    int cols = 42;
+    int rows = 100;
+    int cols = 100;
 
     std::vector<std::vector<int>> grid(rows, std::vector<int>(cols));
 
-    init_generation(grid, rows, cols, 0.42);
+    init_generation(grid, rows, cols, 0.84);
 
     pretty_print(grid, rows, cols);
 
@@ -117,11 +116,13 @@ int main() {
 
     using namespace std::chrono_literals;
     while (count<10000) {
-        next_generation(grid, rows, cols);
+        int population = next_generation(grid, rows, cols);
         pretty_print(grid, rows, cols);
         count++;
-        std::cout << "Generation : " << count << std::endl;
-        std::this_thread::sleep_for(10ms);
+
+        std::cout << "Generation : " << count;
+        std::cout << " Population : " << population << std::endl;
+        std::this_thread::sleep_for(50ms);
     }
 
     return 0;
